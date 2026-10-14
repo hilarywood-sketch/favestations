@@ -5,13 +5,13 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>My trains</title>
 <style>
-  body { background:#000; color:#0000FF; font:16px/1.4 "Courier New", monospace; margin:0; padding:16px; }
-  h2 { font-size:18px; margin:20px 0 6px; border-bottom:1px solid #553a00; padding-bottom:4px; }
+  body { background:#fff; color:#14213d; font:16px/1.4 -apple-system, "Segoe UI", Roboto, Arial, sans-serif; margin:0; padding:16px; }
+  h2 { font-size:18px; margin:20px 0 6px; border-bottom:1px solid #c9d1e3; padding-bottom:4px; }
   table { border-collapse:collapse; width:100%; max-width:640px; }
-  td { padding:2px 8px 2px 0; vertical-align:top; }
-  td.due { text-align:right; white-space:nowrap; }
-  .line { color:#fff; }
-  .muted { color:#7a5500; font-size:13px; }
+  td { padding:3px 10px 3px 0; vertical-align:top; }
+  td.due { text-align:right; white-space:nowrap; font-weight:600; }
+  .line { font-weight:600; }
+  .muted { color:#5f6f94; font-size:13px; }
 </style>
 </head>
 <body>
@@ -29,8 +29,8 @@ const STATIONS = {
 };
 // Optional per-station filters: return true for trains to keep.
 const FILTERS = {
-  "Penge West": a => a.platformName === "Platform 1"   // northbound (towards Highbury & Islington),
-  "West Ham": a => a.platformName.includes("Westbound"),
+  "Penge West": a => a.platformName === "Platform 1",   // northbound (towards Highbury & Islington)
+  "West Ham": a => (a.platformName || "").includes("Westbound"),
   "London Bridge": a => a.lineName === "Jubilee"
 };
 const ROWS_PER_STATION = 8;
