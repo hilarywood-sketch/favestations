@@ -22,11 +22,11 @@
 // Stations: name -> list of TfL NaPTAN IDs (not HUB IDs).
 // Find IDs at https://api.tfl.gov.uk/StopPoint/Search/<name>, then https://api.tfl.gov.uk/StopPoint/<HUB id>
 const STATIONS = {
+  "Abbey Road":    ["940GZZDLABR"],
   "West Ham":      ["940GZZLUWHM", "940GZZDLWHM"],
-  "London Bridge": ["940GZZLULNB"],
   "Canada Water":  ["940GZZLUCWR", "910GCNDAW"],
-  "Penge West":    ["910GPENEW"],
-  "Abbey Road":    ["940GZZDLABR"]
+  "London Bridge": ["940GZZLULNB"],
+  "Penge West":    ["910GPENEW"]
 };
 // Optional per-station filters: return true for trains to keep.
 const FILTERS = {
