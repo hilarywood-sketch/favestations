@@ -1,0 +1,87 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>My trains</title>
+<style>
+  body { background:#000; color:#ffb000; font:16px/1.4 "Courier New", monospace; margin:0; padding:16px; }
+  h2 { font-size:18px; margin:20px 0 6px; border-bottom:1px solid #553a00; padding-bottom:4px; }
+  table { border-collapse:collapse; width:100%; max-width:640px; }
+  td { padding:2px 8px 2px 0; vertical-align:top; }
+  td.due { text-align:right; white-space:nowrap; }
+  .line { color:#fff; }
+  .muted { color:#7a5500; font-size:13px; }
+</style>
+</head>
+<body>
+<div id="board">Loading…</div>
+<p class="muted" id="updated"></p>
+
+<script>
+// Stations: name -> list of TfL NaPTAN IDs (not HUB IDs).
+// Find IDs at https://api.tfl.gov.uk/StopPoint/Search/<name>, then https://api.tfl.gov.uk/StopPoint/<HUB id>
+const STATIONS = {
+  "West Ham":      ["940GZZLUWHM", "940GZZDLWHM"],
+  "London Bridge": ["940GZZLULNB"],
+  "Canada Water":  ["940GZZLUCWR", "910GCNDAW"],
+  "Penge West":    ["910GPENEW"]
+};
+const ROWS_PER_STATION = 8;
+const REFRESH_SECONDS = 30;
+
+const clean = s => (s || "")
+  .replace(/ (Underground|DLR|Rail) Station$/, "")
+  .replace(/ ELL$/, "");
+
+const esc = s => String(s).replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+
+async function getArrivals(id) {
+  const r = await fetch(`https://api.tfl.gov.uk/StopPoint/${id}/Arrivals`);
+  if (!r.ok) throw new Error(`${id}: HTTP ${r.status}`);
+  const d = await r.json();
+  return Array.isArray(d) ? d : [];
+}
+
+async function station(name, ids) {
+  try {
+    const all = (await Promise.all(ids.map(getArrivals))).flat();
+    // The feed can repeat the same train; keep one per vehicle/destination/platform.
+    const seen = new Set();
+    const rows = all
+      .sort((a, b) => a.timeToStation - b.timeToStation)
+      .filter(a => {
+        const k = `${a.vehicleId}|${a.destinationName}|${a.platformName}`;
+        if (seen.has(k)) return false;
+        seen.add(k); return true;
+      })
+      .slice(0, ROWS_PER_STATION);
+
+    if (!rows.length) return `<h2>${esc(name)}</h2><p class="muted">No trains shown</p>`;
+
+    return `<h2>${esc(name)}</h2><table>` + rows.map(a => {
+      const mins = Math.floor(a.timeToStation / 60);
+      return `<tr>
+        <td class="line">${esc(a.lineName)}</td>
+        <td>${esc(clean(a.destinationName || a.towards))}</td>
+        <td class="muted">${esc(a.platformName || "")}</td>
+        <td class="due">${mins < 1 ? "due" : mins + " min"}</td>
+      </tr>`;
+    }).join("") + `</table>`;
+  } catch (e) {
+    return `<h2>${esc(name)}</h2><p class="muted">Couldn't load (${esc(e.message)})</p>`;
+  }
+}
+
+async function refresh() {
+  const html = await Promise.all(Object.entries(STATIONS).map(([n, ids]) => station(n, ids)));
+  document.getElementById("board").innerHTML = html.join("");
+  document.getElementById("updated").textContent =
+    "Updated " + new Date().toLocaleTimeString("en-GB") + " · TfL Unified API · refreshes every " + REFRESH_SECONDS + "s";
+}
+
+refresh();
+setInterval(refresh, REFRESH_SECONDS * 1000);
+</script>
+</body>
+</html>
