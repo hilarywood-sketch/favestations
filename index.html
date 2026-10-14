@@ -33,7 +33,7 @@ const FILTERS = {
   "Penge West":    a => a.platformName === "Platform 1",   // northbound (towards Highbury & Islington)
   "West Ham":      a => (a.platformName || "").includes("Westbound"),
   "London Bridge": a => a.lineName === "Jubilee",
-  "Canada Water":  a => a.lineName !== "Jubilee" || (a.platformName || "").includes("Westbound")
+  "Canada Water":  a => a.lineName !== "Jubilee" || (a.platformName || "").includes("Eastbound")
 };
 const ROWS_PER_STATION = 8;
 const REFRESH_SECONDS = 30;
